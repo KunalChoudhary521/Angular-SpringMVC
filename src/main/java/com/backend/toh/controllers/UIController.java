@@ -8,8 +8,13 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @RequestMapping("/ui")
 public class UIController {
 
-    @RequestMapping(method = RequestMethod.GET)
-    public String forwardToAngularApplication() {
+    @RequestMapping(value = "/jsp", method = RequestMethod.GET)
+    public String displayJspFile() {
         return "home";
+    }
+
+    @RequestMapping(value = "/ng", method = RequestMethod.GET)
+    public String forwardToAngular() {
+        return "forward:/ui/index.html"; // alternatively: "forward:/ng-dist/index.html";
     }
 }
