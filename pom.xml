@@ -69,7 +69,72 @@
 					</excludes>
 				</configuration>
 			</plugin>
+
+			<plugin>
+				<groupId>com.github.eirslett</groupId>
+				<artifactId>frontend-maven-plugin</artifactId>
+				<configuration>
+					<!-- use -Dskip.installnodenpm to skip node and npm re-installation -->
+					<workingDirectory>${project.basedir}/src/main/webapp/tour-of-heroes</workingDirectory>
+					<nodeVersion>v14.15.2</nodeVersion>
+					<npmVersion>6.14.9</npmVersion>
+				</configuration>
+				<executions>
+					<execution>
+						<id>install node and npm</id>
+						<goals>
+							<goal>install-node-and-npm</goal>
+						</goals>
+					</execution>
+
+					<execution>
+						<id>npm install</id>
+						<goals>
+							<goal>npm</goal>
+						</goals>
+					</execution>
+
+					<execution>
+						<id>npm test</id>
+						<goals>
+							<goal>npm</goal>
+						</goals>
+
+						<phase>test</phase>
+						<configuration>
+							<arguments>run test-ci</arguments>
+						</configuration>
+					</execution>
+
+					<execution>
+						<id>npm build</id>
+						<goals>
+							<goal>npm</goal>
+						</goals>
+
+						<phase>prepare-package</phase>
+						<configuration>
+							<arguments>run build-ci</arguments>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
+
+		<resources>
+			<resource>
+				<directory>${project.basedir}/src/main/webapp/</directory>
+				<excludes>
+					<exclude>tour-of-heroes/**</exclude>
+				</excludes>
+			</resource>
+			<resource>
+				<directory>${project.basedir}/src/main/resources/</directory>
+				<includes>
+					<include>*.properties</include>
+				</includes>
+			</resource>
+		</resources>
 	</build>
 
 	<repositories>
