@@ -5,7 +5,8 @@
   "description": "Example project from an angular.io guide.",
   "scripts": {
     "lint": "tslint ./src/**/*.ts -t verbose",
-    "start": "ng serve --proxy-config=proxy.config.json",
+    "start": "ng serve",
+    "start-proxy": "ng serve --proxy-config=proxy.config.json",
     "test": "ng test",
     "test-ci": "ng test --karma-config=./karma.conf.ci.js",
     "build": "ng build --prod",

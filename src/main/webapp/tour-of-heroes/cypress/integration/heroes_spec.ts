@@ -1,3 +1,11 @@
+import { HEROES } from '../../src/app/mock-heroes';
+import { Hero } from "../../src/app/hero";
+
+function visitUrl(url) {
+  cy.intercept('GET', '/api/heroes', { body: HEROES }).as('getHeroes');
+  cy.visit(url);
+  cy.wait('@getHeroes');
+}
 
 describe('Tour of Heroes - E2E tests', () => {
 
@@ -5,7 +13,7 @@ describe('Tour of Heroes - E2E tests', () => {
 
     /* method executes before ALL tests in a describe block*/
     before(() => {
-      cy.visit('http://localhost:4200');
+      visitUrl('http://localhost:4200');
     });
 
     it('displays title', () => {
@@ -29,11 +37,10 @@ describe('Tour of Heroes - E2E tests', () => {
 
   });
 
-
   describe('Dashboard tests', () => {
 
     before(() => {
-      cy.visit('http://localhost:4200');
+      visitUrl('http://localhost:4200');
     });
 
     it('has 4 top heroes', () => {
@@ -61,7 +68,7 @@ describe('Tour of Heroes - E2E tests', () => {
   describe('Hero search tests', () => {
 
     before(() => {
-      cy.visit('http://localhost:4200');
+      visitUrl('http://localhost:4200');
     });
 
     it('can search for a hero', () => {
@@ -78,8 +85,8 @@ describe('Tour of Heroes - E2E tests', () => {
 
   describe('Perform CRUD on Heroes', () => {
 
-    before(() => {
-      cy.visit('http://localhost:4200/heroes');
+    beforeEach(() => {
+      visitUrl('http://localhost:4200/heroes');
     });
 
     it('shows hero-detail component by clicking on a hero', () => {
@@ -93,34 +100,52 @@ describe('Tour of Heroes - E2E tests', () => {
     });
 
     it('adds hero', () => {
+      const newHero: Hero = { id: 42, name: 'Brand New Hero' };
+      cy.intercept('POST', '/api/heroes', { body: newHero }).as('addHero');
+
       cy.get(`app-heroes-ui ul li`).should('have.length', 10);
-      cy.get('app-heroes-ui input').type('Brand New Hero');
+      cy.get('app-heroes-ui input').type(newHero.name);
       cy.get('app-heroes-ui button').contains('Add').click();
+      cy.wait('@addHero');
 
       cy.get(`app-heroes-ui ul li`).should('have.length', 11);
-      cy.get(`app-heroes-ui ul li`).contains('Brand New Hero');
+      cy.get(`app-heroes-ui ul li`).contains(newHero.name);
       cy.get('app-messages div').contains('HeroService: added');
     });
 
     it('updates hero', () => {
+      const updatedHero: Hero = HEROES[HEROES.length - 1];
+      updatedHero.name = 'Updated Hero';
+      cy.intercept('PUT', `/api/heroes/${updatedHero.id}`, { body: updatedHero }).as('updateHero');
+
       cy.get(`app-heroes-ui ul li`).last().click();
       cy.url().should('include', '/detail');
       cy.get('app-hero-detail-ui #heroName').clear().type('Updated Hero');
       cy.get('app-hero-detail-ui button').contains('Save').click();
       cy.url().should('include', '/heroes');
+      cy.wait('@updateHero');
 
       cy.get(`app-heroes-ui ul li`).contains('Updated Hero');
       cy.get('app-messages div').contains('HeroService: updated hero');
     });
 
     it('deletes 2 heroes', () => {
-      cy.get(`app-heroes-ui ul li button`).last().contains('x').click();
-      cy.get('app-messages div').contains('HeroService: deleted hero');
-      cy.get(`app-heroes-ui ul li`).should('have.length', 10);
+      let lastHero: Hero = HEROES[HEROES.length - 1];
+      let secondLastHero: Hero = HEROES[HEROES.length - 2];
 
+      cy.intercept('DELETE', `/api/heroes/${lastHero.id}`, { statusCode: 200 }).as('lastHero');
       cy.get(`app-heroes-ui ul li button`).last().contains('x').click();
+      cy.wait('@lastHero');
+
       cy.get('app-messages div').contains('HeroService: deleted hero');
       cy.get(`app-heroes-ui ul li`).should('have.length', 9);
+
+      cy.intercept('DELETE', `/api/heroes/${secondLastHero.id}`, { statusCode: 200 }).as('secondLastHero');
+      cy.get(`app-heroes-ui ul li button`).last().contains('x').click();
+      cy.wait('@secondLastHero');
+
+      cy.get('app-messages div').contains('HeroService: deleted hero');
+      cy.get(`app-heroes-ui ul li`).should('have.length', 8);
     });
 
     it('does not update hero if "Back" button is clicked', () => {
@@ -141,7 +166,7 @@ describe('Tour of Heroes - E2E tests', () => {
     it('clears Messages by clicking the "clear" button', () => {
       cy.get(`app-messages-ui`).should('exist');
       cy.get(`app-messages-ui .messages-title`).contains('Messages');
-      cy.get(`app-messages-ui .hero-message`).should('have.length', 5);
+      cy.get(`app-messages-ui .hero-message`).should('have.length', 1);
       cy.get(`app-messages-ui button`).contains('Clear').click();
 
       cy.get(`app-messages-ui div`).should('not.exist');
