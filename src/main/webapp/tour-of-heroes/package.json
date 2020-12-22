@@ -9,7 +9,7 @@
     "test": "ng test",
     "test-ci": "ng test --karma-config=./karma.conf.ci.js",
     "build": "ng build --prod",
-    "build-ci": "ng build --prod=true --output-hashing=none --outputPath=../ng-dist/",
+    "build-ci": "ng build --prod=true --output-hashing=none --output-path=../ng-dist/ --base-href=/ui/",
     "e2e": "cypress open",
     "ng": "ng"
   },
