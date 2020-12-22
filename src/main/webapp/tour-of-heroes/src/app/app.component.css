@@ -1,0 +1,11 @@
+/* AppComponent's private CSS styles */
+
+.heroes-nav {
+  margin: 1.5rem 0;
+  font-size: 1rem;
+  font-weight: bold;
+}
+h1 {
+  color: #369;
+  font-size: 2rem;
+}

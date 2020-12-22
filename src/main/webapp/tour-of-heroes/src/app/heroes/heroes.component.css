@@ -1,0 +1,74 @@
+/* HeroesComponent's private CSS styles */
+
+.heroes-header {
+  display: flex;
+  align-items: center;
+}
+
+.btn-add-hero {
+  margin-left: 1rem;
+  position: relative;
+  top: -5px;
+}
+
+.hero-label {
+  font-size: 1rem;
+}
+
+.hero-label input{
+  width: 15rem;
+}
+
+.heroes {
+  list-style-type: none;
+  margin: 1rem 0;
+  width: 17.5rem;
+}
+
+.heroes-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  margin-bottom: .5rem;
+  font-size: 1rem;
+  background-color: #eee;
+  position: relative;
+}
+
+.heroes-item:hover {
+  color: #607D8B;
+  background-color: #ddd;
+  left: .1rem;
+}
+
+.heroes-item__link {
+  display: flex;
+  align-items: center;
+  width: 100%;
+
+  cursor: pointer;
+}
+
+.heroes-item__id {
+  background-color:#405061;
+  padding: .4rem;
+  color: #ddd;
+  border-radius: 4px 0 0 4px;
+}
+
+.heroes-item__name {
+  margin-left: 2rem;
+}
+
+.heroes-item__delete {
+  border: none;
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+  cursor: pointer;
+
+  background-color: gray;
+  color: white;
+}
+
+

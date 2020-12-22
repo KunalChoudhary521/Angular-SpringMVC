@@ -1,0 +1,11 @@
+/* Global Styles */
+@import '~bootstrap/dist/css/bootstrap.css';
+
+body {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 62.5%; /* 62.5% of 16px = 10px; Now, 1rem = 10px */
+  box-sizing: border-box;
+  font-family: Arial, Helvetica, sans-serif;
+}

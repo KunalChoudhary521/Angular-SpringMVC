@@ -1,0 +1,7 @@
+<div class="messages-container" *ngIf="messages?.length">
+  <div class="messages-header">
+    <h3 class="messages-title">Messages</h3>
+    <button class="btn btn-danger btn-sm" (click)="clear.emit()">Clear</button>
+  </div>
+  <div class="hero-message" *ngFor='let message of messages'> {{message}} </div>
+</div>

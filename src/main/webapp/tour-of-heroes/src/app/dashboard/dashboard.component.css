@@ -1,0 +1,34 @@
+/* DashboardComponent's private CSS styles */
+h3 {
+  text-align: center;
+}
+
+a {
+  text-decoration: none;
+}
+
+.dashboard-container {
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: space-evenly;
+}
+
+.dashboard-hero {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  padding: 2rem;
+  margin: .75rem 0;
+  color: #eee;
+  height: 7.5rem;
+  width: 20rem;
+  background-color: #3f525c;
+  border-radius: 2px;
+}
+
+.dashboard-hero:hover {
+  background-color: #ddd;
+  cursor: pointer;
+  color: #607d8b;
+}

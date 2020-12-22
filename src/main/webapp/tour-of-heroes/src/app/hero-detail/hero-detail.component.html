@@ -1,0 +1,15 @@
+<div class="hero-details-container" *ngIf="hero">
+  <h4>{{hero.name | uppercase}} Details</h4>
+  <form class="hero-form">
+    <label for="heroId">Id:</label>
+    <input id="heroId" disabled [value]="hero.id" placeholder="name"/>
+
+    <label for="heroName">Name:</label>
+    <input #heroName id="heroName" [value]="hero.name" placeholder="name"/>
+
+    <button class="back-btn btn btn-danger btn-sm" (click)="cancel.emit()">Back</button>
+    <button class="save-btn btn btn-primary btn-sm"
+            (click)="heroChange.emit({id: hero.id, name: heroName.value})"
+            type="submit">Save</button>
+  </form>
+</div>

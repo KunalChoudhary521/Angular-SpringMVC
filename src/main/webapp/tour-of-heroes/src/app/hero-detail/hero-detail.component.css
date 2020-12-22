@@ -1,0 +1,33 @@
+/* HeroDetailComponent's private CSS styles */
+
+.hero-details-container {
+  width: 50%;
+}
+
+.hero-form {
+  font-size: 1rem;
+  display: grid;
+  grid-template-columns: 10rem 1fr 1fr;
+}
+
+label {
+  grid-column: 1 / 2;
+}
+
+input {
+  grid-column: 2 / 3;
+}
+
+.back-btn, .save-btn {
+  width: 50%;
+  justify-self: center;
+  margin: 1rem;
+}
+
+.back-btn {
+  grid-column: 1 / 2;
+}
+
+.save-btn {
+  grid-column: 2 / 3;
+}
