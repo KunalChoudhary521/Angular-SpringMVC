@@ -2,7 +2,6 @@ package com.backend.toh.controllers;
 
 import com.backend.toh.domain.Hero;
 import com.backend.toh.services.HeroService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -21,8 +20,11 @@ import java.util.Collection;
 @RequestMapping(value = "/api/heroes", produces = MediaType.APPLICATION_JSON_VALUE)
 public class HeroesController {
 
-    @Autowired
-    private HeroService heroService;
+    private final HeroService heroService;
+
+    public HeroesController(HeroService heroService) {
+        this.heroService = heroService;
+    }
 
     @GetMapping()
     public Collection<Hero> getHeroes() {

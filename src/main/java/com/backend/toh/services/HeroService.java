@@ -1,40 +1,45 @@
 package com.backend.toh.services;
 
 import com.backend.toh.domain.Hero;
+import com.backend.toh.entities.HeroDto;
+import com.backend.toh.mappers.HeroMapper;
+import com.backend.toh.repositories.HeroRepository;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Comparator;
+import java.util.List;
 import java.util.Optional;
-import java.util.Set;
-import java.util.TreeSet;
 
 public class HeroService {
 
-    private static final Set<Hero> heroes = initialHeroes();
-    private static int currentId = findMaxHeroId();
+    private final HeroRepository heroRepository;
+
+    public HeroService(HeroRepository heroRepository) {
+        this.heroRepository = heroRepository;
+    }
 
     public Collection<Hero> getAllHeroes() {
+        List<Hero> heroes = new ArrayList<>();
+        heroRepository.findAll().forEach(hero -> heroes.add(HeroMapper.heroDtoToHero(hero)));
         return heroes;
     }
 
     public Optional<Hero> getHeroById(int id) {
-        return heroes.stream().filter(hero -> hero.getId() == id).findFirst();
+        return getHeroDtoById(id).map(HeroMapper::heroDtoToHero);
     }
 
     public Optional<Hero> addHero(Hero hero) {
-        Hero newHero = new Hero(hero);
-        currentId++;
-        newHero.setId(currentId);
-
-        return heroes.add(newHero) ? Optional.of(newHero) : Optional.empty();
+        return Optional.of(heroRepository.save(HeroMapper.heroToHeroDto(hero)))
+                       .map(HeroMapper::heroDtoToHero);
     }
 
     public boolean updateHero(int id, Hero hero) {
         if (id == hero.getId()) {
-            Optional<Hero> optionalHero = getHeroById(id);
-            if (optionalHero.isPresent()) {
-                optionalHero.get().setName(hero.getName());
+            Optional<HeroDto> oldHeroDto = getHeroDtoById(id);
+            if (oldHeroDto.isPresent()) {
+                HeroDto updatedHeroDto = HeroMapper.heroToHeroDto(hero);
+                updatedHeroDto.setId(oldHeroDto.get().getId());
+                heroRepository.save(updatedHeroDto);
                 return true;
             }
         }
@@ -42,27 +47,15 @@ public class HeroService {
     }
 
     public boolean deleteHero(int id) {
-        Optional<Hero> optionalHero = getHeroById(id);
-        return optionalHero.isPresent() && heroes.remove(optionalHero.get());
+        Optional<HeroDto> heroDto = getHeroDtoById(id);
+        if(heroDto.isPresent()) {
+            heroRepository.delete(heroDto.get());
+            return true;
+        }
+        return false;
     }
 
-    private static int findMaxHeroId() {
-        return heroes.stream()
-                .map(Hero::getId).max(Comparator.comparingInt(a -> a))
-                .orElseThrow(() -> new RuntimeException("ERROR: CurrentId not found!"));
-    }
-
-    private static Set<Hero> initialHeroes() {
-        return new TreeSet<>(Arrays.asList(
-                new Hero(20, "Tornado"),
-                new Hero(11, "Dr Nice"),
-                new Hero(12, "Narco"),
-                new Hero(13, "Bombasto"),
-                new Hero(14, "Celeritas"),
-                new Hero(15, "Magneta"),
-                new Hero(16, "RubberMan"),
-                new Hero(17, "Dynama"),
-                new Hero(18, "Dr IQ"),
-                new Hero(19, "Magma")));
+    private Optional<HeroDto> getHeroDtoById(int id) {
+        return heroRepository.findById(id);
     }
 }
