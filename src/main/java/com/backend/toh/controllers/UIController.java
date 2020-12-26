@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class UIController {
 
     @GetMapping(value = "/jsp")
-    public String displayJspFile() {
+    public String displayJsp() {
         return "home";
     }
 

@@ -41,7 +41,7 @@ public class HeroesController {
     @PostMapping()
     public ResponseEntity<Hero> addHero(@RequestBody Hero requestHero) {
         return heroService.addHero(requestHero)
-                          .map(hero -> new ResponseEntity<>(hero, HttpStatus.OK))
+                          .map(hero -> new ResponseEntity<>(hero, HttpStatus.CREATED))
                           .orElseGet(() -> new ResponseEntity<>(HttpStatus.BAD_REQUEST));
     }
 
