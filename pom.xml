@@ -15,6 +15,7 @@
 	<description>Sample Spring MVC project</description>
 
 	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<java.version>1.8</java.version>
 	</properties>
 
@@ -157,6 +158,29 @@
 						<phase>prepare-package</phase>
 						<configuration>
 							<arguments>run build-ci</arguments>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>3.1.0</version>
+				<executions>
+					<execution>
+						<id>copy-tour-of-heroes</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.basedir}/target/classes/ng-dist</outputDirectory>
+							<resources>
+								<resource>
+									<directory>${project.basedir}/src/main/webapp/ng-dist</directory>
+								</resource>
+							</resources>
 						</configuration>
 					</execution>
 				</executions>
