@@ -3,6 +3,7 @@ package com.backend.toh.controllers;
 import com.backend.toh.domain.Hero;
 import com.backend.toh.services.HeroService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,17 +12,22 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -33,10 +39,17 @@ public class HeroesControllerTests {
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     @Autowired
-    private MockMvc mockMvc;
+    private WebApplicationContext context;
 
     @MockBean
     private HeroService heroService;
+
+    private MockMvc mockMvc;
+
+    @BeforeEach
+    public void setUp() {
+        mockMvc = MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).build();
+    }
 
     @Test
     public void getRequest_getHeroes_returnOkWithAllHeroes() throws Exception {
@@ -78,15 +91,15 @@ public class HeroesControllerTests {
         when(heroService.addHero(hero)).thenReturn(Optional.of(hero));
 
         this.mockMvc.perform(post(HEROES_URL).contentType(MediaType.APPLICATION_JSON)
-                                             .content(objectMapper.writeValueAsString(hero)))
+                                             .content(objectMapper.writeValueAsString(hero))
+                                             .with(csrf()))
                     .andExpect(status().isCreated())
                     .andExpect(jsonPath("$.id").value(1)).andExpect(jsonPath("$.name").value("Mock Hero #1"));
     }
 
-
     @Test
     public void unableToAddHero_addHero_returnBadRequest() throws Exception {
-        this.mockMvc.perform(post(HEROES_URL))
+        this.mockMvc.perform(post(HEROES_URL).with(csrf()))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$").doesNotExist());
     }
@@ -99,7 +112,8 @@ public class HeroesControllerTests {
         when(heroService.updateHero(id, hero)).thenReturn(true);
 
         this.mockMvc.perform(put(HEROES_URL + "/" + id).contentType(MediaType.APPLICATION_JSON)
-                                                       .content(objectMapper.writeValueAsString(hero)))
+                                                       .content(objectMapper.writeValueAsString(hero))
+                                                       .with(csrf()))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$").doesNotExist());
     }
@@ -110,7 +124,8 @@ public class HeroesControllerTests {
         Hero hero  = buildHero(id, "Updated Hero");
 
         this.mockMvc.perform(put(HEROES_URL + "/" + id).contentType(MediaType.APPLICATION_JSON)
-                                                       .content(objectMapper.writeValueAsString(hero)))
+                                                       .content(objectMapper.writeValueAsString(hero))
+                                                       .with(csrf()))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$").value("Unable to update hero with id: 1"));
     }
@@ -121,7 +136,7 @@ public class HeroesControllerTests {
 
         when(heroService.deleteHero(id)).thenReturn(true);
 
-        this.mockMvc.perform(delete(HEROES_URL + "/" + id))
+        this.mockMvc.perform(delete(HEROES_URL + "/" + id).with(csrf()))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$").doesNotExist());
     }
@@ -129,9 +144,31 @@ public class HeroesControllerTests {
     @Test
     public void unableToDelete_deleteHero_returnBadRequest() throws Exception {
         int id = 1;
-        this.mockMvc.perform(delete(HEROES_URL + "/" + id))
+        this.mockMvc.perform(delete(HEROES_URL + "/" + id).with(csrf()))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$").value("Unable to delete hero with id: 1"));
+    }
+
+    @Test
+    public void postRequestWithoutCsrf_addHero_returnForbidden() throws Exception {
+        Hero hero = buildHero(1, "Mock Hero #1");
+
+        this.mockMvc.perform(post(HEROES_URL).contentType(MediaType.APPLICATION_JSON)
+                                             .content(objectMapper.writeValueAsString(hero)))
+                    .andExpect(status().isForbidden())
+                    .andExpect(jsonPath("$").doesNotExist());
+    }
+
+    @Test
+    public void putRequestWithInvalidCsrfToken_updateHero_returnForbidden() throws Exception {
+        int id = 1;
+        Hero hero  = buildHero(id, "Updated Hero");
+
+        this.mockMvc.perform(put(HEROES_URL + "/" + id).contentType(MediaType.APPLICATION_JSON)
+                                                       .content(objectMapper.writeValueAsString(hero))
+                                                       .with(csrf().useInvalidToken()))
+                    .andExpect(status().isForbidden())
+                    .andExpect(jsonPath("$").doesNotExist());
     }
 
     private Hero buildHero(int id, String name) {
