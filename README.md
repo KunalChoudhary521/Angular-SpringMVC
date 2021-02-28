@@ -13,8 +13,9 @@
 4. [Project Build](#project-build)
 5. [Application Packaging](#application-packaging)
 6. [Calling API Endpoints](#calling-api-endpoints)
-7. [Pros & Cons](#pros-and-cons)
-8. [Tips & Tricks](#tips-and-tricks)
+7. [Application Security](#application-security)
+8. [Pros & Cons](#pros-and-cons)
+9. [Tips & Tricks](#tips-and-tricks)
 
 # Main Setup
 ## Architecture Overview
@@ -33,9 +34,9 @@ To create a new one, use `ng new <app-name>` (install Angular CLI globally using
 After the directory structure is created, ensure that the Angular application is running by executing `ng serve` and browsing to `http://localhost:4200`.
 
 ## URL routing
-Since Angular application is embedded within Spring MVC project, the UI and API share the same host and port. In this project, Spring MVC serves the Angular’s production **"bundle"** instead of files of Angular from the `tour-of-heroes` development directory.
+Since Angular application is embedded within Spring MVC project, the UI and API share the same host and port. In this project, Spring MVC serves the Angular’s production **"bundle"** instead of files from the `tour-of-heroes` development directory.
 
-To create this bundle, run `ng build --prod` in the development directory. This command creates a `dist` folder which contains the HTML, CSS and JS files required to run in a production environment. The `index.html` file contains a custom HTML element named <app-root></app-root>, which is the root element and the entry-point for the Angular application. For reasons that I explain below, I use the Angular CLI to generate the production bundle named `ng-dist` folder under `src/main/webapp` with base href set to `/ui/`.
+To create this bundle, run `ng build --prod` in the development directory. This command creates a `dist` folder which contains the HTML, CSS and JS files required to run in a production environment. The `index.html` file contains a custom HTML element named `<app-root></app-root>`, which is the root element and the entry-point for the Angular application. This project uses the Angular CLI to generate the production bundle named `ng-dist` folder under `src/main/webapp` with base href set to `/ui/`.
 
 For the API, the REST endpoints have a Spring Controller at `/api/heroes` path. For the UI, I serve files from the `ng-dist` folder at the `/ui` path using the following configuration 
 ```java
@@ -62,7 +63,7 @@ public class UIController {
 }
 ```
 
-When you run the Spring application through an IDE (ex. IntelliJ) and browse to `http://localhost/ui/`, you will see the root component of the application. This is tomcat embedded server ([tomcat-embed-jasper maven dependency](https://github.com/KunalChoudhary521/Angular-SpringMVC/blob/master/pom.xml)) serving files from the `/src/main/webapp/ng-dist` folder. This configuration is sufficient to route to the home page of the Angular application; however, visiting any routes in [app-routing.module.ts](https://github.com/KunalChoudhary521/Angular-SpringMVC/blob/master/src/main/webapp/tour-of-heroes/src/app/app-routing.module.ts) is not possible yet. When a request is made to a certain path (ex. `/ui/dashboard`), Spring MVC looks for a controller method for such a path and does not find one. As a result, the application returns **404 – not found**. Spring MVC needs to hand-off routing to the Angular for these UI routes. There are 2 ways to achieve this:
+When you run the Spring application through an IDE (ex. IntelliJ) and browse to `http://localhost/ui/`, you will see the root component of the application. This is tomcat embedded server ([tomcat-embed-jasper maven dependency](https://github.com/KunalChoudhary521/Angular-SpringMVC/blob/master/pom.xml)) serving files from the `/src/main/webapp/ng-dist` folder. This configuration is sufficient to route to the home page of the Angular application; however, visiting any routes in [app-routing.module.ts](https://github.com/KunalChoudhary521/Angular-SpringMVC/blob/master/src/main/webapp/tour-of-heroes/src/app/app-routing.module.ts) is not yet possible. When a request is made to a certain path (ex. `/ui/dashboard`), Spring MVC looks for a controller method for such a path and does not find one. As a result, the application returns **404 – not found**. Spring MVC needs to hand-off routing to the Angular for these UI routes. There are 2 ways to achieve this:
 1. Define sub-paths in the `value` attribute of the @GetMapping annotation. This works if your UI has few routes, or if you are using Spring MVC 3 or lower.
 ```java
 @Controller
@@ -97,7 +98,7 @@ public class WebConfig implements WebMvcConfigurer {
 
 
 ## Project Build
-As mentioned earlier, Spring MVC serves the Angular’s production "bundle" (or `ng-dist` folder) instead of the `tour-of-heroes` development directory. This build step can be automated using the `frontend-maven-plugin` like so ([pom.xml](https://github.com/KunalChoudhary521/Angular-SpringMVC/blob/master/pom.xml)).
+As mentioned earlier, Spring MVC serves the Angular’s production "bundle" (or `ng-dist` folder) instead of the `tour-of-heroes` development directory. This bundle generation can be automated using the `frontend-maven-plugin` like so ([pom.xml](https://github.com/KunalChoudhary521/Angular-SpringMVC/blob/master/pom.xml)).
 
 Instead of relying on the globally installed node and npm, this plugin downloads an OS-specific node and npm in the specified directory (in this case, `/src/main/webapp/tour-of-heroes`). Additionally, you can setup the plugin to run any npm script described in [package.json](https://github.com/KunalChoudhary521/Angular-SpringMVC/blob/master/src/main/webapp/tour-of-heroes/package.json). I used it to download dependencies (`npm install`), run unit tests (`npm run test-ci`), run E2E UI tests (`npm run e2e-ci`) and build the final “bundle” (`npm run build-ci`).
 
@@ -107,7 +108,7 @@ Since Spring MVC serves files from the Angular’s production "bundle", it is be
 ## Calling API Endpoints
 To make a request to one of the Spring controller endpoints, simply create an Angular service, define a base URL and use Angular’s HTTP client ([like so](https://github.com/KunalChoudhary521/Angular-SpringMVC/blob/master/src/main/webapp/tour-of-heroes/src/app/hero.service.ts)). In this project, the Heroes Controller is defined at `/api/heroes`. **Note that calls from the UI to `api/heroes` is different from `/api/heroes`**. The former will append to the base-href of the Angular application (in this case, `/ui/`); whereas, the latter ignores it.
 
-Generally, the UI and API are running as standalone application during development. In this case, the UI runs on `http://locahost:4200` and the API on `http://locahost:5000`. You can use a [proxy.config.js](https://github.com/KunalChoudhary521/Angular-SpringMVC/blob/dev/src/main/webapp/tour-of-heroes/proxy.config.json) as a workaround this issue. The JSON object simply informs Angular (actually webpack) to call `http://locahost:5000/api/heroes` when a request is made to`http://locahost:4200/api/heroes`.
+Generally, the UI and API are running as standalone application during development. In this case, the UI runs on `http://locahost:4200` and the API on `http://locahost:5000`. You can use a [proxy.config.js](https://github.com/KunalChoudhary521/Angular-SpringMVC/blob/master/src/main/webapp/tour-of-heroes/proxy.config.json) as a workaround this issue. The JSON object simply informs Angular (actually webpack) to call `http://locahost:5000/api/heroes` when a request is made to`http://locahost:4200/api/heroes`.
 
 ```json
 {
@@ -118,6 +119,36 @@ Generally, the UI and API are running as standalone application during developme
         "changeOrigin": true
     }
 }
+```
+
+# Application Security
+To secure REST API endpoints, include the `spring-boot-starter-security` dependency and add Spring security configuration class [like so](https://github.com/KunalChoudhary521/Angular-SpringMVC/blob/master/src/main/java/com/backend/toh/config/WebSecurityConfig.java). Simply by including `@EnableWebSecurity`, Spring augments HTTP requests with the following headers:
+ * Cache Control (Cache-Control: no-cache)
+ * Content Type Options (x-content-type-options: nosniff)
+ * X-Frame-Options (x-frame-options: DENY)
+ * X-XSS-Protection (x-xss-protection: 1; mode=block)
+These headers can be found in the `Network` tab in Chrome Developer tools. For more details about these headers, please refer to the [documentation](https://docs.spring.io/spring-security/site/docs/5.0.x/reference/html/headers.html). 
+
+## Cross-Site Request Forgery (CSRF) protection
+In addition to headers above, this project provides security against CSRF attacks. To enable, add the following configuration to Spring:
+```java
+public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+        http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            .and()
+            .csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse());
+    }
+}
+```
+
+Upon a GET request from the UI, Spring sends a CSRF token (`XSRF-TOKEN`) in a cookie. When the UI makes a state-changing request (ex. POST, PUT, DELETE), Angular places this token in the request header (`X-XSRF-TOKEN`). Any state-changing request with an invalid or missing CSRF token returns a Forbidden (`403`) status code. On the Angular side, set `withCredentials` http option to `true` in the service like so:
+```js
+const httpOptions = {
+    headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
+    withCredentials: true
+  };
 ```
 
 # Pros and Cons
@@ -141,6 +172,8 @@ Generally, the UI and API are running as standalone application during developme
 * Spring boot with H2 database: [link](https://www.baeldung.com/spring-boot-h2-database)
 * Testing with H2 and DataJpaTest: [link](https://rieckpil.de/test-your-spring-boot-jpa-persistence-layer-with-datajpatest/)
 * Testing controller methods: [link #1](https://www.baeldung.com/spring-boot-testing) [link #2](https://spring.io/guides/gs/testing-web/)
+* Spring Security's Cross-site Request Forgery (CSRF): [link](https://docs.spring.io/spring-security/site/docs/5.0.x/reference/html/csrf.html)
+* Testing controller methods with Spring Security enabled: [link](https://docs.spring.io/spring-security/site/docs/5.0.x/reference/html/test-mockmvc.html)
 
 ## Angular
 * Ignore base-href (ex. /ui/) when making HTTP calls to api (ex: /api/heroes): [link](https://stackoverflow.com/a/62308890)
