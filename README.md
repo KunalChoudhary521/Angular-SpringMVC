@@ -4,7 +4,7 @@
 1. Build an executable JAR: `mvn clean install`
    - For linux OS, change browser to `Chromium` in `karma.conf.js` and `ChromiumHeadless` in `karma.conf.ci.js`. Or use `--browsers` karma flag.
 2. Run the JAR: `java -jar target/toh-0.0.1-SNAPSHOT.jar`
-3. Browse to the UI: `http://localhost:5000/ui/`. Add, update and delete heroes in the **Heroes** tab.
+3. Browse to the UI: `http://localhost:9000/ui/`. Add, update and delete heroes in the **Heroes** tab.
 
 # Table of Contents
 1. [Architecture Overview](#architecture-overview)
@@ -63,7 +63,7 @@ public class UIController {
 }
 ```
 
-When you run the Spring Boot application through an IDE (ex. IntelliJ) and browse to `http://localhost:5000/ui/`, you will see the Angular application being served from the `/src/main/webapp/ng-dist` folder. This configuration is sufficient to route to the home page of the Angular application; however, visiting any routes in [app-routing.module.ts](https://github.com/KunalChoudhary521/Angular-SpringMVC/blob/master/src/main/webapp/tour-of-heroes/src/app/app-routing.module.ts) is not yet possible. When a request is made to a certain path (ex. `/ui/dashboard`), Spring MVC looks for a controller method for such a path and does not find one. As a result, the application returns **404 – not found**. Spring MVC needs to hand-off routing to the Angular for these UI routes. There are 2 ways to achieve this:
+When you run the Spring Boot application through an IDE (ex. IntelliJ) and browse to `http://localhost:9000/ui/`, you will see the Angular application being served from the `/src/main/webapp/ng-dist` folder. This configuration is sufficient to route to the home page of the Angular application; however, visiting any routes in [app-routing.module.ts](https://github.com/KunalChoudhary521/Angular-SpringMVC/blob/master/src/main/webapp/tour-of-heroes/src/app/app-routing.module.ts) is not yet possible. When a request is made to a certain path (ex. `/ui/dashboard`), Spring MVC looks for a controller method for such a path and does not find one. As a result, the application returns **404 – not found**. Spring MVC needs to hand-off routing to the Angular for these UI routes. There are 2 ways to achieve this:
 1. Define sub-paths in the `value` attribute of the @GetMapping annotation. This works if your UI has few routes, or if you are using Spring MVC 3 or lower.
 ```java
 @Controller
@@ -108,12 +108,12 @@ Since Spring MVC serves files from the Angular’s production "bundle", it is be
 ## Calling API Endpoints
 To make a request to one of the Spring controller endpoints, simply create an Angular service, define a base URL and use Angular’s HTTP client ([like so](https://github.com/KunalChoudhary521/Angular-SpringMVC/blob/master/src/main/webapp/tour-of-heroes/src/app/hero.service.ts)). In this project, the Heroes Controller is defined at `/api/heroes`. **Note that calls from the UI to `api/heroes` is different from `/api/heroes`**. The former will append to the base-href of the Angular application (in this case, `/ui/`); whereas, the latter ignores it.
 
-Generally, the UI and API are running as standalone application during development. In this case, the UI runs on `http://locahost:4200` and the API on `http://locahost:5000`. You can use a [proxy.config.js](https://github.com/KunalChoudhary521/Angular-SpringMVC/blob/master/src/main/webapp/tour-of-heroes/proxy.config.json) as a workaround this issue. The JSON object simply informs Angular (actually webpack) to call `http://locahost:5000/api/heroes` when a request is made to`http://locahost:4200/api/heroes`.
+Generally, the UI and API are running as standalone application during development. In this case, the UI runs on `http://locahost:4200` and the API on `http://locahost:9000`. You can use a [proxy.config.js](https://github.com/KunalChoudhary521/Angular-SpringMVC/blob/master/src/main/webapp/tour-of-heroes/proxy.config.json) as a workaround this issue. The JSON object simply informs Angular (actually webpack) to call `http://locahost:9000/api/heroes` when a request is made to`http://locahost:4200/api/heroes`.
 
 ```json
 {
     "/api/heroes": {
-        "target": "http://localhost:5000",
+        "target": "http://localhost:9000",
         "secure": false,
         "logLevel": "debug",
         "changeOrigin": true
