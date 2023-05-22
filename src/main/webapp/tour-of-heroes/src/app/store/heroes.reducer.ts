@@ -11,7 +11,7 @@ export const initialAppState: HeroesState = heroAdapter.getInitialState({
 // tslint:disable-next-line:variable-name
 const _heroesReducer = createReducer(initialAppState,
   on(HeroesActions.getHeroes, state => ({...state, isLoading: true})),
-  on(HeroesActions.getHeroesSuccess, (state, { heroes }) => heroAdapter.addAll(heroes, state)),
+  on(HeroesActions.getHeroesSuccess, (state, { heroes }) => heroAdapter.addMany(heroes, state)),
   on(HeroesActions.getHeroesFail, (state, { errors }) => ({...state, heroes: null, isLoading: false, errors })),
 
   on(HeroesActions.addHero, state => ({...state })),
