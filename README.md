@@ -4,7 +4,7 @@
 1. Build an executable JAR: `mvn clean install`
    - For linux OS, change browser to `Chromium` in `karma.conf.js` and `ChromiumHeadless` in `karma.conf.ci.js`. Or use `--browsers` karma flag.
 2. Run the JAR: `java -jar target/toh-0.0.1-SNAPSHOT.jar`
-3. Browse to the UI: `http://localhost:9000/ui/`. Add, update and delete heroes in the **Heroes** tab.
+3. Browse to the UI: `http://localhost:9000/ui`. Add, update and delete heroes in the **Heroes** tab.
 
 # Table of Contents
 1. [Architecture Overview](#architecture-overview)
