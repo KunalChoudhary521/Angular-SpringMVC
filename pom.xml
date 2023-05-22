@@ -101,8 +101,8 @@
 				<configuration>
 					<!-- use -Dskip.installnodenpm to skip node and npm re-installation -->
 					<workingDirectory>${project.basedir}/src/main/webapp/tour-of-heroes</workingDirectory>
-					<nodeVersion>v14.15.2</nodeVersion>
-					<npmVersion>6.14.9</npmVersion>
+					<nodeVersion>v18.16.0</nodeVersion>
+					<npmVersion>9.5.1</npmVersion>
 				</configuration>
 				<executions>
 					<execution>
