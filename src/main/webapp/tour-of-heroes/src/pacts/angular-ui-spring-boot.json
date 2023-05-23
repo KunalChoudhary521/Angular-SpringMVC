@@ -1,0 +1,43 @@
+{
+  "consumer": {
+    "name": "angular-ui"
+  },
+  "provider": {
+    "name": "spring-boot"
+  },
+  "interactions": [
+    {
+      "description": "a request to GET all heroes",
+      "providerState": "A list of heroes exists",
+      "request": {
+        "method": "GET",
+        "path": "/api/heroes"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+        },
+        "body": [
+          {
+            "id": 1,
+            "name": "CDC Hero 1"
+          },
+          {
+            "id": 2,
+            "name": "CDC Hero 2"
+          }
+        ],
+        "matchingRules": {
+          "$.body": {
+            "match": "type"
+          }
+        }
+      }
+    }
+  ],
+  "metadata": {
+    "pactSpecification": {
+      "version": "3.0.0"
+    }
+  }
+}

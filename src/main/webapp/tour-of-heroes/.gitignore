@@ -44,3 +44,6 @@ Thumbs.db
 
 # Cypress
 /cypress/videos/*
+
+# Pact
+src/logs/*.log
